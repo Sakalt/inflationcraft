@@ -1,11 +1,9 @@
-name: Release
+name: Deploy
 
 on:
   push:
     branches:
       - 'main'  # mainブランチにプッシュされたときにトリガー
-    tags:
-      - 'v*'  # vで始まるタグがプッシュされたときにトリガー
 
 jobs:
   build:
@@ -15,15 +13,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create zip file
+      - name: Create ZIP file
         run: |
           zip -r release.zip . -x README.md
 
-      - name: Upload Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref }}  # タグ名
-          target_commitish: 'main'  # リリースを作成する対象ブランチを指定
-          files: release.zip
+      - name: Commit and push ZIP file
+        run: |
+          git config user.name "github-actions"  # GitHub Actionsのユーザー名
+          git config user.email "github-actions@github.com"  # GitHub Actionsのメールアドレス
+          git add release.zip
+          git commit -m "Add release ZIP file"
+          git push origin main  # mainブランチにプッシュ
         env:
-          GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN }}  # 組織のトークンを使用
